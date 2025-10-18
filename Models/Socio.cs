@@ -1,4 +1,4 @@
-namespace Libranet.Models;
+namespace libranet.Models;
 
 public class Socio
 {

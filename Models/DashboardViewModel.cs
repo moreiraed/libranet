@@ -1,6 +1,6 @@
 // Un ViewModel es una clase simple que solo contiene los datos que una vista necesita mostrar.
 // No se guarda en la base de datos.
-namespace Libranet.Models
+namespace libranet.Models
 {
     public class DashboardViewModel
     {

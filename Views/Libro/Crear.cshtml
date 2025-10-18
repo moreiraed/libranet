@@ -1,0 +1,43 @@
+@model libranet.Models.Libro
+@{
+    ViewData["Title"] = "Añadir Nuevo Libro";
+}
+
+<h2>@ViewData["Title"]</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Crear">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Titulo" class="form-label"></label>
+                <input asp-for="Titulo" class="form-control" />
+                <span asp-validation-for="Titulo" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Autor" class="form-label"></label>
+                <input asp-for="Autor" class="form-control" />
+                <span asp-validation-for="Autor" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ISBN" class="form-label"></label>
+                <input asp-for="ISBN" class="form-control" />
+                <span asp-validation-for="ISBN" class="text-danger"></span>
+            </div>
+
+            @* Campo oculto para el Estado.
+               Como un libro nuevo siempre está "Disponible", no necesitamos que el usuario lo elija.
+               Simplemente enviamos el valor por defecto que establecimos en el controlador. *@
+            <input type="hidden" asp-for="Estado" />
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Crear Libro</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>

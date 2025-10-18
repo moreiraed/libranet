@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using Libranet.Models;
+using libranet.Models;
 using Microsoft.AspNetCore.Authorization;
-using Libranet.Data; // Para usar LibranetContext
+using libranet.Data; // Para usar LibranetContext
 using System.Linq; // Para usar .Count(), .Where(), etc.
 
-namespace Libranet.Controllers
+namespace libranet.Controllers
 {
     [Authorize] // Esta etiqueta protege todo el controlador
     public class HomeController : Controller

@@ -38,6 +38,22 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/home/eduardo/Desarrollo/DotNet/Web/libranet/Views/Libro/Crear.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTGlicm8vQ3JlYXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/eduardo/Desarrollo/DotNet/Web/libranet/Views/Libro/Editar.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTGlicm8vRWRpdGFyLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/eduardo/Desarrollo/DotNet/Web/libranet/Views/Libro/Eliminar.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTGlicm8vRWxpbWluYXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/eduardo/Desarrollo/DotNet/Web/libranet/Views/Libro/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTGlicm8vSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/home/eduardo/Desarrollo/DotNet/Web/libranet/Views/Shared/Error.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0Vycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 

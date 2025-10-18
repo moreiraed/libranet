@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Libranet.Data; // Importa el DbContext
-using Libranet.Models; // Importa los modelos
+using libranet.Data; // Importa el DbContext
+using libranet.Models; // Importa los modelos
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,7 +20,7 @@ builder.Services.AddAuthentication("CookieAuth")
         options.LoginPath = "/Account/Login";
     });
 
-builder.Services.AddDbContext<Libranet.Data.LibranetContext>(options =>
+builder.Services.AddDbContext<libranet.Data.LibranetContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 var app = builder.Build();

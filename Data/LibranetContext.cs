@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
-using Libranet.Models;
+using libranet.Models;
 
-namespace Libranet.Data
+namespace libranet.Data
 {
     public class LibranetContext : DbContext
     {

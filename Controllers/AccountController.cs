@@ -1,10 +1,10 @@
 using Microsoft.AspNetCore.Mvc;
-using Libranet.Data;
+using libranet.Data;
 using System.Linq;
 using System.Security.Claims; // Necesario para crear la "identidad" del usuario.
 using Microsoft.AspNetCore.Authentication; // Necesario para el SignIn y SignOut.
 
-namespace Libranet.Controllers
+namespace libranet.Controllers
 {
     public class AccountController : Controller
     {

@@ -1,11 +1,11 @@
 // Usamos 'using' para importar las herramientas que necesitaremos.
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization; // Para proteger el controlador.
-using Libranet.Data; // Para usar nuestro LibranetContext.
-using Libranet.Models; // Para usar la clase Socio.
+using libranet.Data; // Para usar nuestro LibranetContext.
+using libranet.Models; // Para usar la clase Socio.
 using Microsoft.EntityFrameworkCore;
 
-namespace Libranet.Controllers
+namespace Lzibranet.Controllers
 {
     [Authorize] // Esta etiqueta asegura que solo usuarios logueados puedan acceder.
     public class SocioController : Controller

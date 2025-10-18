@@ -1,0 +1,43 @@
+@* Este '@model' le dice a la vista que espera recibir una lista de objetos 'Libro'. *@
+@model IEnumerable<libranet.Models.Libro>
+
+@{
+    ViewData["Title"] = "Gestión de Libros";
+}
+
+<h2>@ViewData["Title"]</h2>
+<hr />
+
+<p>
+    @* Este es un enlace que lleva al formulario para crear un nuevo libro. *@
+    <a asp-action="Crear" class="btn btn-primary">Añadir Nuevo Libro</a>
+</p>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Título</th>
+            <th>Autor</th>
+            <th>ISBN</th>
+            <th>Estado</th>
+            <th></th> </tr>
+    </thead>
+    <tbody>
+        @* Usamos un bucle '@foreach' para recorrer cada libro y crear una fila en la tabla. *@
+        @foreach (var libro in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => libro.Titulo)</td>
+                <td>@Html.DisplayFor(modelItem => libro.Autor)</td>
+                <td>@Html.DisplayFor(modelItem => libro.ISBN)</td>
+                <td>@Html.DisplayFor(modelItem => libro.Estado)</td>
+                <td>
+                    @* Enlaces para acciones futuras (Editar, Detalles, Eliminar). *@
+                    <a asp-action="Editar" asp-route-id="@libro.LibroId">Editar</a> |
+                    <a asp-action="Detalles" asp-route-id="@libro.LibroId">Detalles</a> |
+                    <a asp-action="Eliminar" asp-route-id="@libro.LibroId">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

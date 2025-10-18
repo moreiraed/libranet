@@ -1,0 +1,33 @@
+@model libranet.Models.Libro
+@{
+    ViewData["Title"] = "Eliminar Libro";
+}
+
+<h2>@ViewData["Title"]</h2>
+<h3 class="text-danger">¿Estás seguro de que quieres eliminar este libro?</h3>
+<hr />
+
+<div>
+    <h4>Detalles del Libro</h4>
+
+    @* Usamos una lista de descripción para mostrar los datos en modo de solo lectura. *@
+    <dl class="row">
+        <dt class="col-sm-3">Título</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Titulo)</dd>
+
+        <dt class="col-sm-3">Autor</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Autor)</dd>
+
+        <dt class="col-sm-3">ISBN</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.ISBN)</dd>
+    </dl>
+
+    @* Este formulario enviará la petición de eliminación al servidor. *@
+    <form asp-action="Eliminar">
+        @* Campo oculto para enviar el Id del libro que se va a eliminar. *@
+        <input type="hidden" asp-for="LibroId" />
+
+        <button type="submit" class="btn btn-danger">Confirmar Eliminación</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>
