@@ -1,8 +1,61 @@
-﻿@{
-    ViewData["Title"] = "Home Page";
+﻿@model Libranet.Models.DashboardViewModel
+@{
+    ViewData["Title"] = "Panel de Control";
 }
 
 <div class="text-center">
-    <h1 class="display-4">Welcome</h1>
-    <p>Learn about <a href="https://learn.microsoft.com/aspnet/core">building Web apps with ASP.NET Core</a>.</p>
+    <h1 class="display-4">Bienvenido a Libranet</h1>
+    <p>Panel de Control del Sistema de Biblioteca.</p>
+</div>
+
+<hr />
+
+<div class="row g-4 mb-4">
+    <div class="col-md-3">
+        <div class="card text-white bg-primary h-100">
+            <div class="card-body">
+                <h5 class="card-title">Libros Prestados</h5>
+                <p class="card-text fs-2">@Model.LibrosPrestados</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-danger h-100">
+            <div class="card-body">
+                <h5 class="card-title">Préstamos Vencidos</h5>
+                <p class="card-text fs-2">@Model.PrestamosVencidos</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-success h-100">
+            <div class="card-body">
+                <h5 class="card-title">Total de Socios</h5>
+                <p class="card-text fs-2">@Model.TotalSocios</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3">
+        <div class="card text-white bg-dark h-100">
+            <div class="card-body">
+                <h5 class="card-title">Total de Libros</h5>
+                <p class="card-text fs-2">@Model.TotalLibros</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<hr />
+
+<div class="row g-3">
+    <h3 class="mt-4">Acciones Rápidas</h3>
+    <div class="col-md-4">
+        <a asp-controller="Prestamo" asp-action="Crear" class="btn btn-lg btn-primary w-100 p-4">Registrar Nuevo Préstamo</a>
+    </div>
+    <div class="col-md-4">
+        <a asp-controller="Socio" asp-action="Crear" class="btn btn-lg btn-info w-100 p-4">Añadir Nuevo Socio</a>
+    </div>
+    <div class="col-md-4">
+        <a asp-controller="Libro" asp-action="Index" class="btn btn-lg btn-secondary w-100 p-4">Gestionar Libros</a>
+    </div>
 </div>

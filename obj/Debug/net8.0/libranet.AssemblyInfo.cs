@@ -13,7 +13,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("libranet")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+41efb6355f56e8e3444730938fc196d46d791cdc")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+963c8bc8c767f00ff1d94f55fedd94187d73f811")]
 [assembly: System.Reflection.AssemblyProductAttribute("libranet")]
 [assembly: System.Reflection.AssemblyTitleAttribute("libranet")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

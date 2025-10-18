@@ -1,33 +1,50 @@
-using System.Diagnostics;
 using Microsoft.AspNetCore.Mvc;
-using libranet.Models;
+using Libranet.Models;
 using Microsoft.AspNetCore.Authorization;
+using Libranet.Data; // Para usar LibranetContext
+using System.Linq; // Para usar .Count(), .Where(), etc.
 
-namespace libranet.Controllers;
-
-[Authorize]
-public class HomeController : Controller
+namespace Libranet.Controllers
 {
-    private readonly ILogger<HomeController> _logger;
-
-    public HomeController(ILogger<HomeController> logger)
+    [Authorize] // Esta etiqueta protege todo el controlador
+    public class HomeController : Controller
     {
-        _logger = logger;
-    }
+        // Inyectamos el contexto de la base de datos, igual que en AccountController.
+        private readonly LibranetContext _context;
 
-    public IActionResult Index()
-    {
-        return View();
-    }
+        public HomeController(LibranetContext context)
+        {
+            _context = context;
+        }
 
-    public IActionResult Privacy()
-    {
-        return View();
-    }
+        // --- LÓGICA DEL PANEL DE CONTROL ---
+        public IActionResult Index()
+        {
+            // Creamos una nueva instancia de nuestro ViewModel.
+            var viewModel = new DashboardViewModel
+            {
+                // Contamos cuántos libros tienen el estado "Prestado".
+                LibrosPrestados = _context.Libros.Count(l => l.Estado == EstadoLibro.Prestado),
 
-    [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
-    public IActionResult Error()
-    {
-        return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+                // Contamos cuántos préstamos activos (sin fecha de devolución real)
+                // tienen una fecha de devolución prevista que ya pasó.
+                PrestamosVencidos = _context.Prestamos.Count(p => p.FechaDevolucionReal == null && p.FechaDevolucionPrevista < DateTime.Now),
+
+                // Contamos el total de socios registrados.
+                TotalSocios = _context.Socios.Count(),
+
+                // Contamos el total de libros en el catálogo.
+                TotalLibros = _context.Libros.Count()
+            };
+
+            // Enviamos el ViewModel (el "paquete" con todas nuestras estadísticas) a la vista.
+            return View(viewModel);
+        }
+
+        // Mantenemos esta acción por si la necesitamos más adelante.
+        public IActionResult Privacy()
+        {
+            return View();
+        }
     }
 }
