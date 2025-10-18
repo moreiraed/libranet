@@ -157,3 +157,4 @@
 /home/eduardo/Desarrollo/DotNet/Web/libranet/obj/Debug/net8.0/libranet.pdb
 /home/eduardo/Desarrollo/DotNet/Web/libranet/obj/Debug/net8.0/libranet.genruntimeconfig.cache
 /home/eduardo/Desarrollo/DotNet/Web/libranet/obj/Debug/net8.0/ref/libranet.dll
+/home/eduardo/Desarrollo/DotNet/Web/libranet/bin/Debug/net8.0/BCrypt.Net-Next.dll

@@ -1,9 +1,10 @@
 {
   "version": 2,
-  "dgSpecHash": "5s52ibI+e2U9w7p6Q28cVUiDLjcO+c444QWYd2z7uRxaZmfy2+9N3CcVItB00n3ypcSToEZeLhT8jcfcfPY8vQ==",
+  "dgSpecHash": "SD4M23E6AXI7oPUyRAJFu5GxVD0JSsmpyURl84Y7gs2MnnYrZJrYBVJ4sV6BkwOoT0wgAi8LD9vYge7lRA+aMg==",
   "success": true,
   "projectFilePath": "/home/eduardo/Desarrollo/DotNet/Web/libranet/libranet.csproj",
   "expectedPackageFiles": [
+    "/home/eduardo/.nuget/packages/bcrypt.net-next/4.0.3/bcrypt.net-next.4.0.3.nupkg.sha512",
     "/home/eduardo/.nuget/packages/humanizer.core/2.14.1/humanizer.core.2.14.1.nupkg.sha512",
     "/home/eduardo/.nuget/packages/microsoft.bcl.asyncinterfaces/7.0.0/microsoft.bcl.asyncinterfaces.7.0.0.nupkg.sha512",
     "/home/eduardo/.nuget/packages/microsoft.build.framework/17.8.3/microsoft.build.framework.17.8.3.nupkg.sha512",
