@@ -1,0 +1,56 @@
+@model IEnumerable<libranet.Models.Prestamo>
+@{
+    ViewData["Title"] = "Historial de Préstamos";
+}
+
+<h2>@ViewData["Title"]</h2>
+<hr />
+
+<p>
+    <a asp-action="Crear" class="btn btn-primary">Registrar Nuevo Préstamo</a>
+</p>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Libro</th>
+            <th>Socio</th>
+            <th>Fecha de Préstamo</th>
+            <th>Devolución Prevista</th>
+            <th>Estado</th>
+            <th></th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var prestamo in Model)
+        {
+            <tr>
+                @* Mostramos el Título del libro relacionado *@
+                <td>@Html.DisplayFor(modelItem => prestamo.Libro!.Titulo)</td>
+                @* Mostramos el Apellido y Nombre del socio relacionado *@
+                <td>@Html.DisplayFor(modelItem => prestamo.Socio!.Apellido), @Html.DisplayFor(modelItem => prestamo.Socio!.Nombre)</td>                <td>@prestamo.FechaPrestamo.ToShortDateString()</td>
+                <td>@prestamo.FechaDevolucionPrevista.ToShortDateString()</td>
+                <td>
+                    @* --- LÓGICA PARA MOSTRAR EL ESTADO --- *@
+                    @if (prestamo.FechaDevolucionReal == null)
+                    {
+                        // Si la fecha de devolución es nula, el préstamo está activo.
+                        <span class="badge bg-warning text-dark">Activo</span>
+                    }
+                    else
+                    {
+                        // Si tiene fecha, el préstamo está finalizado.
+                        <span class="badge bg-success">Devuelto</span>
+                    }
+                </td>
+                <td>
+                    @* Si el préstamo está activo, mostramos un botón para registrar la devolución. *@
+                    @if (prestamo.FechaDevolucionReal == null)
+                    {
+                        <a asp-action="Devolucion" asp-route-id="@prestamo.PrestamoId" class="btn btn-sm btn-info">Registrar Devolución</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
