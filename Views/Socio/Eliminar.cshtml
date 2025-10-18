@@ -1,0 +1,33 @@
+@model Libranet.Models.Socio
+@{
+    ViewData["Title"] = "Eliminar Socio";
+}
+
+<h2>@ViewData["Title"]</h2>
+<h3 class="text-danger">¿Estás seguro de que quieres eliminar a este socio?</h3>
+<hr />
+
+<div>
+    <h4>Detalles del Socio</h4>
+
+    @* Usamos una lista de descripción <dl> para mostrar los datos en modo de solo lectura. *@
+    <dl class="row">
+        <dt class="col-sm-3">Apellido</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Apellido)</dd>
+
+        <dt class="col-sm-3">Nombre</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Nombre)</dd>
+
+        <dt class="col-sm-3">DNI</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.DNI)</dd>
+    </dl>
+
+    @* Este formulario enviará la petición de eliminación al servidor. *@
+    <form asp-action="Eliminar">
+        @* Campo oculto para enviar el Id del socio que se va a eliminar. *@
+        <input type="hidden" asp-for="SocioId" />
+
+        <button type="submit" class="btn btn-danger">Confirmar Eliminación</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>

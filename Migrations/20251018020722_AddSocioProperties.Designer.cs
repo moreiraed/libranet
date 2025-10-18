@@ -3,6 +3,7 @@ using System;
 using Libranet.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -10,9 +11,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace libranet.Migrations
 {
     [DbContext(typeof(LibranetContext))]
-    partial class LibranetContextModelSnapshot : ModelSnapshot
+    [Migration("20251018020722_AddSocioProperties")]
+    partial class AddSocioProperties
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "9.0.10");
@@ -120,10 +123,6 @@ namespace libranet.Migrations
                     b.Property<int>("SocioId")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<string>("Apellido")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("DNI")
                         .IsRequired()

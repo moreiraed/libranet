@@ -1,0 +1,51 @@
+@* --- COMENTARIO --- *@
+@* Este '@model' le dice a la vista que espera recibir una lista de objetos 'Socio'. *@
+@model IEnumerable<Libranet.Models.Socio>
+
+@{
+    ViewData["Title"] = "Lista de Socios";
+}
+
+<h2>@ViewData["Title"]</h2>
+<hr />
+
+<p>
+    @* Este es un enlace que lleva al formulario para crear un nuevo socio. *@
+    <a asp-action="Crear" class="btn btn-primary">Añadir Nuevo Socio</a>
+</p>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            @* Encabezados de nuestra tabla. *@
+            <th>Apellido</th>
+            <th>Nombre</th>
+            <th>DNI</th>
+            <th>Número de Socio</th>
+            <th>Email</th>
+            <th>Fecha de Alta</th>
+            <th></th> </tr>
+    </thead>
+    <tbody>
+        @* --- COMENTARIO --- *@
+        @* Usamos un bucle '@foreach' para recorrer cada socio en la lista que recibimos *@
+        @* del controlador y crear una fila en la tabla para cada uno. *@
+        @foreach (var socio in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => socio.Apellido)</td>
+                <td>@Html.DisplayFor(modelItem => socio.Nombre)</td>
+                <td>@Html.DisplayFor(modelItem => socio.DNI)</td>
+                <td>@Html.DisplayFor(modelItem => socio.NumeroSocio)</td>
+                <td>@Html.DisplayFor(modelItem => socio.Email)</td>
+                <td>@Html.DisplayFor(modelItem => socio.FechaDeAlta)</td>
+                <td>
+                    @* Enlaces para acciones futuras (Editar, Detalles, Eliminar). *@
+                    <a asp-action="Editar" asp-route-id="@socio.SocioId">Editar</a> |
+                    <a asp-action="Detalles" asp-route-id="@socio.SocioId">Detalles</a> |
+                    <a asp-action="Eliminar" asp-route-id="@socio.SocioId">Eliminar</a>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>
