@@ -54,6 +54,18 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTGlicm8vSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[/home/eduardo/Desarrollo/DotNet/Web/libranet/Views/Multa/Crear.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTXVsdGEvQ3JlYXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/eduardo/Desarrollo/DotNet/Web/libranet/Views/Multa/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTXVsdGEvSW5kZXguY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/home/eduardo/Desarrollo/DotNet/Web/libranet/Views/Multa/Pagar.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTXVsdGEvUGFnYXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/home/eduardo/Desarrollo/DotNet/Web/libranet/Views/Prestamo/Crear.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJlc3RhbW8vQ3JlYXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 

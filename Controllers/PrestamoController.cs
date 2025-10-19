@@ -145,36 +145,56 @@ namespace libranet.Controllers
             return View(prestamo);
         }
 
-        // --- MÉTODO PARA EJECUTAR LA DEVOLUCIÓN (POST) ---
+        // --- MÉTODO PARA EJECUTAR LA DEVOLUCIÓN (ACTUALIZADO) ---
         [HttpPost, ActionName("Devolucion")]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> DevolucionConfirmada(int id)
+        // Añadimos un nuevo parámetro 'bool estaDanado' que recibirá el valor del checkbox.
+        public async Task<IActionResult> DevolucionConfirmada(int id, bool estaDanado)
         {
-            // Buscamos el préstamo que vamos a actualizar.
             var prestamo = await _context.Prestamos.FindAsync(id);
 
             if (prestamo != null)
             {
-                // 1. Marcamos la fecha de devolución real con el momento actual.
                 prestamo.FechaDevolucionReal = DateTime.Now;
+
+                if (prestamo.FechaDevolucionReal > prestamo.FechaDevolucionPrevista)
+                {
+                    var diasDeRetraso = (prestamo.FechaDevolucionReal.Value.Date - prestamo.FechaDevolucionPrevista.Date).Days;
+                    var nuevaMulta = new Multa
+                    {
+                        SocioId = prestamo.SocioId,
+                        Motivo = $"Devolución tardía de {diasDeRetraso} día(s).",
+                        Monto = diasDeRetraso * 100,
+                        FechaCreacion = DateTime.Now,
+                        Estado = EstadoMulta.Pendiente
+                    };
+                    _context.Multas.Add(nuevaMulta);
+                }
+
                 _context.Update(prestamo);
 
-                // 2. Buscamos el libro asociado a este préstamo.
                 var libro = await _context.Libros.FindAsync(prestamo.LibroId);
                 if (libro != null)
                 {
-                    // 3. Cambiamos su estado de vuelta a "Disponible".
                     libro.Estado = EstadoLibro.Disponible;
                     _context.Update(libro);
                 }
 
-                // 4. Guardamos TODOS los cambios en la base de datos (la actualización del préstamo Y del libro).
                 await _context.SaveChangesAsync();
+
+                // --- LÓGICA PARA LIBRO DAÑADO ---
+                // Si el bibliotecario marcó el checkbox...
+                if (estaDanado)
+                {
+                    // ...lo redirigimos a la página de creación de multas,
+                    // pasándole el ID del socio en la URL.
+                    return RedirectToAction("Crear", "Multa", new { socioId = prestamo.SocioId });
+                }
             }
 
-            // Redirigimos al usuario de vuelta a la lista de préstamos.
+            // Si no está dañado, simplemente volvemos a la lista de préstamos.
             return RedirectToAction(nameof(Index));
-        }   
+        }
 
 
     }

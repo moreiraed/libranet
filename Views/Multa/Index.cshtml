@@ -1,0 +1,51 @@
+@model IEnumerable<libranet.Models.Multa>
+@{
+    ViewData["Title"] = "Gestión de Multas";
+}
+
+<h2>@ViewData["Title"]</h2>
+<hr />
+
+<p>
+    <a asp-action="Crear" class="btn btn-primary">Registrar Nueva Multa</a>
+</p>
+
+<table class="table table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Socio</th>
+            <th>Motivo</th>
+            <th>Monto</th>
+            <th>Fecha de Creación</th>
+            <th>Estado</th>
+            <th></th> </tr>
+    </thead>
+    <tbody>
+        @foreach (var multa in Model)
+        {
+            <tr>
+                <td>@Html.DisplayFor(modelItem => multa.Socio!.Apellido), @Html.DisplayFor(modelItem => multa.Socio!.Nombre)</td>
+                <td>@Html.DisplayFor(modelItem => multa.Motivo)</td>
+                <td>@Html.DisplayFor(modelItem => multa.Monto)</td>
+                <td>@multa.FechaCreacion.ToShortDateString()</td>
+                <td>
+                    @if (multa.Estado == libranet.Models.EstadoMulta.Pendiente)
+                    {
+                        <span class="badge bg-danger">Pendiente</span>
+                    }
+                    else
+                    {
+                        <span class="badge bg-success">Pagada</span>
+                    }
+                </td>
+                <td>
+                    @if (multa.Estado == libranet.Models.EstadoMulta.Pendiente)
+                    {
+                        @* Botón para marcar la multa como pagada (lo programaremos luego) *@
+                        <a asp-action="Pagar" asp-route-id="@multa.MultaId" class="btn btn-sm btn-success">Marcar como Pagada</a>
+                    }
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

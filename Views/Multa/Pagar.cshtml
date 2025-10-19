@@ -1,0 +1,31 @@
+@model libranet.Models.Multa
+@{
+    ViewData["Title"] = "Registrar Pago de Multa";
+}
+
+<h2>@ViewData["Title"]</h2>
+<h3 class="text-info">¿Confirmas el pago de esta multa?</h3>
+<hr />
+
+<div>
+    <h4>Detalles de la Multa</h4>
+
+    <dl class="row">
+        <dt class="col-sm-3">Socio</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Socio!.Apellido), @Html.DisplayFor(model => model.Socio!.Nombre)</dd>
+
+        <dt class="col-sm-3">Motivo</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Motivo)</dd>
+
+        <dt class="col-sm-3">Monto</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Monto)</dd>
+    </dl>
+
+    <form asp-action="Pagar">
+        @* Campo oculto para enviar el Id de la multa que se va a procesar. *@
+        <input type="hidden" asp-for="MultaId" />
+
+        <button type="submit" class="btn btn-success">Confirmar Pago</button>
+        <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+    </form>
+</div>

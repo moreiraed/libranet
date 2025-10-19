@@ -8,4 +8,6 @@ public class Multa
     public decimal Monto { get; set; }
     public DateTime FechaCreacion { get; set; }
     public EstadoMulta Estado { get; set; }
+    // Propiedad de navegación para acceder al Socio relacionado.
+    public Socio? Socio { get; set; }
 }

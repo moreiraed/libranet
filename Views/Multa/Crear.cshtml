@@ -1,0 +1,40 @@
+@model libranet.Models.MultaViewModel
+@{
+    ViewData["Title"] = "Registrar Nueva Multa";
+}
+
+<h2>@ViewData["Title"]</h2>
+<hr />
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="Crear">
+            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+            <div class="mb-3">
+                <label asp-for="Multa.SocioId" class="form-label">Socio</label>
+                <select asp-for="Multa.SocioId" class="form-control" asp-items="@Model.Socios">
+                    <option value="">-- Seleccione un Socio --</option>
+                </select>
+                <span asp-validation-for="Multa.SocioId" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Multa.Motivo" class="form-label"></label>
+                <input asp-for="Multa.Motivo" class="form-control" />
+                <span asp-validation-for="Multa.Motivo" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Multa.Monto" class="form-label"></label>
+                <input asp-for="Multa.Monto" class="form-control" type="number" step="0.01" />
+                <span asp-validation-for="Multa.Monto" class="text-danger"></span>
+            </div>
+
+            <div class="form-group">
+                <button type="submit" class="btn btn-primary">Registrar Multa</button>
+                <a asp-action="Index" class="btn btn-secondary">Cancelar</a>
+            </div>
+        </form>
+    </div>
+</div>
