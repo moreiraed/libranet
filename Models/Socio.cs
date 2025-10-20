@@ -11,4 +11,6 @@ public class Socio
     public string Telefono { get; set; } = string.Empty;
     public string Direccion { get; set; } = string.Empty;
     public DateTime FechaDeAlta { get; set; }
+    // Propiedad de navegación para acceder a la lista de préstamos de este socio.
+    public List<Prestamo> Prestamos { get; set; } = new();
 }

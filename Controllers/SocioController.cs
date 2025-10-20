@@ -207,7 +207,8 @@ namespace Lzibranet.Controllers
             // Buscamos por Número de Socio O por DNI.
             var socios = await _context.Socios
                 .Where(s => s.NumeroSocio.Contains(term) || s.DNI.Contains(term))
-                .Select(s => new {
+                .Select(s => new
+                {
                     id = s.SocioId,
                     label = $"{s.NumeroSocio} - {s.Apellido}, {s.Nombre} (DNI: {s.DNI})"
                 })
@@ -215,6 +216,34 @@ namespace Lzibranet.Controllers
                 .ToListAsync();
 
             return Json(socios);
+        }
+        
+        // --- MÉTODO PARA MOSTRAR LOS DETALLES DE UN SOCIO (GET) ---
+        public async Task<IActionResult> Detalles(int? id)
+        {
+            // Si no nos pasan un id, no podemos mostrar nada.
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            // Buscamos el socio en la base de datos.
+            // Usamos '.Include()' dos veces para cargar la información relacionada:
+            // 1. Incluimos la lista de Préstamos de este socio.
+            // 2. Con '.ThenInclude()', le decimos que por cada Préstamo, también cargue los datos del Libro asociado.
+            var socio = await _context.Socios
+                .Include(s => s.Prestamos)
+                    .ThenInclude(p => p.Libro)
+                .FirstOrDefaultAsync(m => m.SocioId == id);
+
+            // Si no encontramos un socio con ese id, devolvemos un error.
+            if (socio == null)
+            {
+                return NotFound();
+            }
+
+            // Enviamos el objeto 'socio' (con toda su información y préstamos) a la vista.
+            return View(socio);
         }
 
     }
