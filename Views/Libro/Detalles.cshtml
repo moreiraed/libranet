@@ -1,0 +1,70 @@
+@model libranet.Models.Libro
+@{
+    ViewData["Title"] = "Detalles del Libro";
+}
+
+<h2>@ViewData["Title"]</h2>
+<hr />
+
+<div>
+    <h4>Información del Libro</h4>
+    <dl class="row">
+        <dt class="col-sm-3">Título</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Titulo)</dd>
+
+        <dt class="col-sm-3">Autor</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Autor)</dd>
+
+        <dt class="col-sm-3">ISBN</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.ISBN)</dd>
+
+        <dt class="col-sm-3">Estado Actual</dt>
+        <dd class="col-sm-9">@Html.DisplayFor(model => model.Estado)</dd>
+    </dl>
+</div>
+
+<hr />
+
+<div>
+    <h4>Historial de Préstamos</h4>
+    @if (Model.Prestamos != null && Model.Prestamos.Any())
+    {
+        <table class="table table-sm table-bordered">
+            <thead>
+                <tr>
+                    <th>Socio</th>
+                    <th>Fecha de Préstamo</th>
+                    <th>Fecha de Devolución</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var prestamo in Model.Prestamos)
+                {
+                    <tr>
+                        <td>@prestamo.Socio!.Apellido, @prestamo.Socio.Nombre</td>
+                        <td>@prestamo.FechaPrestamo.ToShortDateString()</td>
+                        <td>
+                            @if (prestamo.FechaDevolucionReal.HasValue)
+                            {
+                                @prestamo.FechaDevolucionReal.Value.ToShortDateString()
+                            }
+                            else
+                            {
+                                <span class="text-muted">Aún no devuelto</span>
+                            }
+                        </td>
+                    </tr>
+                }
+            </tbody>
+        </table>
+    }
+    else
+    {
+        <p>Este libro no tiene préstamos registrados.</p>
+    }
+</div>
+
+<div class="mt-3">
+    <a asp-action="Editar" asp-route-id="@Model.LibroId" class="btn btn-primary">Editar</a>
+    <a asp-action="Index" class="btn btn-secondary">Volver a la Lista</a>
+</div>

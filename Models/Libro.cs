@@ -7,4 +7,6 @@ public class Libro
     public string Autor { get; set; } = string.Empty;
     public string ISBN { get; set; } = string.Empty;
     public EstadoLibro Estado { get; set; }
+    // Propiedad de navegación para acceder a la lista de préstamos de este libro.
+    public List<Prestamo> Prestamos { get; set; } = new();
 }

@@ -177,9 +177,10 @@ namespace libranet.Controllers
             // Buscamos solo libros que estén DISPONIBLES y que coincidan con el término
             // en el Título, Autor o ISBN.
             var libros = await _context.Libros
-                .Where(l => l.Estado == EstadoLibro.Disponible && 
+                .Where(l => l.Estado == EstadoLibro.Disponible &&
                             (l.Titulo.Contains(term) || l.Autor.Contains(term) || l.ISBN.Contains(term)))
-                .Select(l => new {
+                .Select(l => new
+                {
                     id = l.LibroId,
                     label = $"{l.Titulo} ({l.Autor})"
                 })
@@ -187,6 +188,31 @@ namespace libranet.Controllers
                 .ToListAsync();
 
             return Json(libros);
+        }
+        
+        // --- MÉTODO PARA MOSTRAR LOS DETALLES DE UN LIBRO (GET) ---
+        public async Task<IActionResult> Detalles(int? id)
+        {
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            // Buscamos el libro en la base de datos.
+            // Usamos '.Include()' para cargar la lista de Préstamos de este libro.
+            // Con '.ThenInclude()', por cada Préstamo, también cargamos los datos del Socio asociado.
+            var libro = await _context.Libros
+                .Include(l => l.Prestamos)
+                    .ThenInclude(p => p.Socio)
+                .FirstOrDefaultAsync(m => m.LibroId == id);
+
+            if (libro == null)
+            {
+                return NotFound();
+            }
+
+            // Enviamos el objeto 'libro' (con toda su información y préstamos) a la vista.
+            return View(libro);
         }
 
     }

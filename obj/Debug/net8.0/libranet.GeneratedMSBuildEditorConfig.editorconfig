@@ -42,6 +42,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTGlicm8vQ3JlYXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[/home/eduardo/Desarrollo/DotNet/Web/libranet/Views/Libro/Detalles.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTGlicm8vRGV0YWxsZXMuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/home/eduardo/Desarrollo/DotNet/Web/libranet/Views/Libro/Editar.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvTGlicm8vRWRpdGFyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
