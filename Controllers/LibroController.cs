@@ -165,5 +165,29 @@ namespace libranet.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        // --- ENDPOINT DE BÚSQUEDA DE LIBROS (API) ---
+        [HttpGet]
+        public async Task<IActionResult> Buscar(string term)
+        {
+            if (string.IsNullOrEmpty(term))
+            {
+                return Json(new List<object>());
+            }
+
+            // Buscamos solo libros que estén DISPONIBLES y que coincidan con el término
+            // en el Título, Autor o ISBN.
+            var libros = await _context.Libros
+                .Where(l => l.Estado == EstadoLibro.Disponible && 
+                            (l.Titulo.Contains(term) || l.Autor.Contains(term) || l.ISBN.Contains(term)))
+                .Select(l => new {
+                    id = l.LibroId,
+                    label = $"{l.Titulo} ({l.Autor})"
+                })
+                .Take(10)
+                .ToListAsync();
+
+            return Json(libros);
+        }
+
     }
 }

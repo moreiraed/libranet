@@ -39,39 +39,51 @@ namespace Lzibranet.Controllers
             return View();
         }
 
-        // Este es el método que se ejecuta cuando el formulario es enviado.
-        // [HttpPost] indica que solo responde a peticiones de tipo POST (envíos de formulario).
-        // [ValidateAntiForgeryToken] es una medida de seguridad para prevenir ataques.
-        [HttpPost]
-        [ValidateAntiForgeryToken]
+        // --- MÉTODO PARA GUARDAR EL NUEVO SOCIO (ACTUALIZADO CON NÚMERO SECUENCIAL) ---
+        // Se ejecuta cuando el formulario es enviado.
+        [HttpPost] // [HttpPost] indica que solo responde a peticiones de tipo POST (envíos de formulario).
+        [ValidateAntiForgeryToken] // [ValidateAntiForgeryToken] es una medida de seguridad para prevenir ataques.
         public async Task<IActionResult> Crear(Socio socio)
         {
-            // 'ModelState.IsValid' comprueba si los datos recibidos cumplen con las reglas
-            // del modelo (por ejemplo, si un campo requerido está lleno).
+            // 'ModelState.IsValid' comprueba si los datos recibidos son válidos.
             if (ModelState.IsValid)
             {
-                // --- LÓGICA PARA CREAR EL SOCIO ---
+                // --- LÓGICA PARA GENERAR EL NÚMERO DE SOCIO SECUENCIAL ---
 
-                // 1. Asignamos la fecha de alta al momento actual.
+                // 1. Buscamos el último socio registrado, ordenando por SocioId de forma descendente.
+                var ultimoSocio = await _context.Socios.OrderByDescending(s => s.SocioId).FirstOrDefaultAsync();
+                
+                // 2. Definimos el número inicial por si es el primer socio.
+                int nuevoNumero = 1; 
+
+                if (ultimoSocio != null && !string.IsNullOrEmpty(ultimoSocio.NumeroSocio))
+                {
+                    // 3. Si ya existen socios, intentamos convertir su NumeroSocio a un entero.
+                    if (int.TryParse(ultimoSocio.NumeroSocio, out int ultimoNumero))
+                    {
+                        // 4. Si la conversión es exitosa, le sumamos 1 para obtener el nuevo número.
+                        nuevoNumero = ultimoNumero + 1;
+                    }
+                }
+
+                // 5. Formateamos el número como un string de 5 dígitos, rellenando con ceros a la izquierda (ej: "00001").
+                socio.NumeroSocio = nuevoNumero.ToString("D5");
+
+                // --- FIN DE LA LÓGICA DE GENERACIÓN ---
+
+                // Asignamos la fecha de alta al momento actual.
                 socio.FechaDeAlta = DateTime.Now;
 
-                // 2. Generamos un número de socio único.
-                //    Usamos los primeros 8 caracteres de un GUID para crear un código aleatorio.
-                socio.NumeroSocio = Guid.NewGuid().ToString().Substring(0, 8).ToUpper();
-
-                // 3. Añadimos el nuevo objeto 'socio' al contexto de la base de datos.
-                //    Esto lo prepara para ser guardado.
+                // Añadimos el nuevo objeto 'socio' al contexto para prepararlo.
                 _context.Add(socio);
-
-                // 4. Guardamos los cambios en la base de datos de forma asíncrona.
+                // Guardamos los cambios en la base de datos.
                 await _context.SaveChangesAsync();
 
-                // 5. Redirigimos al usuario a la lista de socios (la crearemos en el siguiente paso).
+                // Redirigimos al usuario a la lista de socios.
                 return RedirectToAction(nameof(Index));
             }
 
-            // Si el modelo no es válido (por ejemplo, faltó un dato),
-            // volvemos a mostrar el formulario con los datos que el usuario ya había ingresado.
+            // Si el modelo no es válido, volvemos a mostrar el formulario.
             return View(socio);
         }
 
@@ -179,6 +191,30 @@ namespace Lzibranet.Controllers
 
             // Redirigimos al usuario a la lista de socios.
             return RedirectToAction(nameof(Index));
+        }
+
+        // --- ENDPOINT DE BÚSQUEDA DE SOCIOS (API) ---
+        // Este método está diseñado para ser llamado por JavaScript.
+        // Recibe un 'term' (el texto que el usuario está escribiendo).
+        [HttpGet]
+        public async Task<IActionResult> Buscar(string term)
+        {
+            if (string.IsNullOrEmpty(term))
+            {
+                return Json(new List<object>());
+            }
+
+            // Buscamos por Número de Socio O por DNI.
+            var socios = await _context.Socios
+                .Where(s => s.NumeroSocio.Contains(term) || s.DNI.Contains(term))
+                .Select(s => new {
+                    id = s.SocioId,
+                    label = $"{s.NumeroSocio} - {s.Apellido}, {s.Nombre} (DNI: {s.DNI})"
+                })
+                .Take(10)
+                .ToListAsync();
+
+            return Json(socios);
         }
 
     }

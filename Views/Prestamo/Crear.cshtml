@@ -8,21 +8,18 @@
 
 <div class="row">
     <div class="col-md-6">
-        <form asp-action="Crear">
-            <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+        <form asp-action="Crear" method="post">
 
             <div class="mb-3">
-                <label class="form-label">Socio</label>
-                <select name="socioId" class="form-control" asp-items="@Model.Socios">
-                    <option value="">-- Seleccione un Socio --</option>
-                </select>
+                <label for="socio-search" class="form-label">Buscar Socio (por Número de Socio o DNI)</label>
+                <input type="text" id="socio-search" class="form-control" placeholder="Empieza a escribir para buscar...">
+                <input type="hidden" name="socioId" id="socioId">
             </div>
 
             <div class="mb-3">
-                <label class="form-label">Libro Disponible</label>
-                <select name="libroId" class="form-control" asp-items="@Model.LibrosDisponibles">
-                    <option value="">-- Seleccione un Libro --</option>
-                </select>
+                <label for="libro-search" class="form-label">Buscar Libro (por Título, Autor o ISBN)</label>
+                <input type="text" id="libro-search" class="form-control" placeholder="Empieza a escribir para buscar...">
+                <input type="hidden" name="libroId" id="libroId">
             </div>
 
             <div class="form-group">
@@ -32,3 +29,56 @@
         </form>
     </div>
 </div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function () {
+            // --- Autocompletado para Socios ---
+            $("#socio-search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "@Url.Action("Buscar", "Socio")",
+                        dataType: "json",
+                        data: {
+                            term: request.term
+                        },
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 2, // Empezar a buscar después de 2 caracteres
+                select: function (event, ui) {
+                    // Cuando se selecciona un socio de la lista...
+                    // Guardamos el texto visible en el campo de búsqueda
+                    $("#socio-search").val(ui.item.label);
+                    // Guardamos el ID en el campo oculto
+                    $("#socioId").val(ui.item.id);
+                    return false;
+                }
+            });
+
+            // --- Autocompletado para Libros ---
+            $("#libro-search").autocomplete({
+                source: function (request, response) {
+                    $.ajax({
+                        url: "@Url.Action("Buscar", "Libro")",
+                        dataType: "json",
+                        data: {
+                            term: request.term
+                        },
+                        success: function (data) {
+                            response(data);
+                        }
+                    });
+                },
+                minLength: 2,
+                select: function (event, ui) {
+                    $("#libro-search").val(ui.item.label);
+                    $("#libroId").val(ui.item.id);
+                    return false;
+                }
+            });
+        });
+    </script>
+}
