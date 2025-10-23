@@ -29,6 +29,8 @@ builder.Services.AddScoped<libranet.Repositories.ISocioRepository, libranet.Repo
 builder.Services.AddScoped<libranet.Repositories.ILibroRepository, libranet.Repositories.LibroRepository>();
 builder.Services.AddScoped<libranet.Repositories.IPrestamoRepository, libranet.Repositories.PrestamoRepository>();
 builder.Services.AddScoped<libranet.Repositories.IMultaRepository, libranet.Repositories.MultaRepository>();
+builder.Services.AddScoped<libranet.Repositories.IAdminRepository, libranet.Repositories.AdminRepository>();
+
 var app = builder.Build();
 
 // --- SECCIÓN PARA SEMBRAR DATOS ---

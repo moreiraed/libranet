@@ -38,13 +38,13 @@
                     </ul>
 
                     <ul class="navbar-nav">
-                        @* --- COMENTARIO --- *@
                         @* Este bloque @if comprueba si el usuario ha iniciado sesión. *@
                         @* Si es así, muestra el botón para cerrar sesión. *@
                         @if (User.Identity != null && User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
                                 <form class="form-inline" asp-controller="Account" asp-action="Logout" method="post">
+                                    @Html.AntiForgeryToken()
                                     <button type="submit" class="nav-link btn btn-link text-dark">Cerrar Sesión</button>
                                 </form>
                             </li>
