@@ -24,12 +24,11 @@ builder.Services.AddAuthentication("CookieAuth")
 builder.Services.AddDbContext<libranet.Data.LibranetContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-// Registra el servicio del repositorio SocioRepository.
+// Registramos los servicios del repositorio.
 builder.Services.AddScoped<libranet.Repositories.ISocioRepository, libranet.Repositories.SocioRepository>();
-
-// Registra el servicio LibroRepository.
 builder.Services.AddScoped<libranet.Repositories.ILibroRepository, libranet.Repositories.LibroRepository>();
-
+builder.Services.AddScoped<libranet.Repositories.IPrestamoRepository, libranet.Repositories.PrestamoRepository>();
+builder.Services.AddScoped<libranet.Repositories.IMultaRepository, libranet.Repositories.MultaRepository>();
 var app = builder.Build();
 
 // --- SECCIÓN PARA SEMBRAR DATOS ---
