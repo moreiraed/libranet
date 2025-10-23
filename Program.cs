@@ -23,6 +23,9 @@ builder.Services.AddAuthentication("CookieAuth")
 builder.Services.AddDbContext<libranet.Data.LibranetContext>(options =>
     options.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+// Registra el servicio del repositorio SocioRepository.
+builder.Services.AddScoped<libranet.Repositories.ISocioRepository, libranet.Repositories.SocioRepository>();
+
 var app = builder.Build();
 
 // --- SECCIÓN PARA SEMBRAR DATOS ---
@@ -40,12 +43,10 @@ using (var scope = app.Services.CreateScope())
         // Verificamos si ya existe algún admin en la base de datos.
         if (!context.Admins.Any())
         {
-            // Si no hay admins, creamos uno.
             context.Admins.Add(new Admin
             {
                 Username = "admin",
-                // ¡IMPORTANTE! Guardamos la contraseña hasheada, no el texto plano.
-                // La contraseña original es "admin123".
+                // Guardamos la contraseña hasheada, no el texto plano.
                 PasswordHash = BCrypt.Net.BCrypt.HashPassword("admin123")
             });
             // Guardamos los cambios en la base de datos.

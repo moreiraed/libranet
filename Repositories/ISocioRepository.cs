@@ -1,0 +1,39 @@
+using libranet.Models;
+using System.Collections.Generic;
+using System.Threading.Tasks;
+
+namespace libranet.Repositories
+{
+    // Esta interfaz define el contrato para cualquier clase que quiera actuar
+    // como un repositorio de Socios.
+    public interface ISocioRepository
+    {
+        // --- OPERACIONES CRUD BÁSICAS ---
+
+        // Obtiene todos los socios.
+        Task<List<Socio>> GetAllAsync();
+
+        // Obtiene un socio específico por su ID.
+        Task<Socio?> GetByIdAsync(int id); // El '?' indica que podría no encontrarlo (devuelve null).
+
+        // Añade un nuevo socio a la base de datos.
+        Task AddAsync(Socio socio);
+
+        // Actualiza un socio existente en la base de datos.
+        Task UpdateAsync(Socio socio);
+
+        // Elimina un socio de la base de datos por su ID.
+        Task DeleteAsync(int id);
+
+        // --- OPERACIONES ESPECÍFICAS ---
+
+        // Busca socios por número de socio o DNI (para el autocompletado).
+        Task<List<Socio>> SearchAsync(string term);
+
+        // Obtiene el último socio registrado (para generar el nuevo número secuencial).
+        Task<Socio?> GetLastAsync();
+
+        // Obtiene un socio por ID, incluyendo sus préstamos y los libros de esos préstamos.
+        Task<Socio?> GetByIdWithDetailsAsync(int id);
+    }
+}
