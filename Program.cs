@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using libranet.Data; // Importa el DbContext
 using libranet.Models; // Importa los modelos
+using libranet.Repositories;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -25,6 +26,9 @@ builder.Services.AddDbContext<libranet.Data.LibranetContext>(options =>
 
 // Registra el servicio del repositorio SocioRepository.
 builder.Services.AddScoped<libranet.Repositories.ISocioRepository, libranet.Repositories.SocioRepository>();
+
+// Registra el servicio LibroRepository.
+builder.Services.AddScoped<libranet.Repositories.ILibroRepository, libranet.Repositories.LibroRepository>();
 
 var app = builder.Build();
 
