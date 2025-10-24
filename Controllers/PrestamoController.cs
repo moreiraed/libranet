@@ -7,6 +7,7 @@ using Microsoft.AspNetCore.Mvc.Rendering; // Necesario para SelectListItem
 using System.Linq;
 using System.Threading.Tasks;
 using libranet.BusinessLogic.Strategies;
+using libranet.BusinessLogic.Factories;
 
 namespace libranet.Controllers
 {
@@ -133,48 +134,35 @@ namespace libranet.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DevolucionConfirmada(int id, bool estaDanado)
         {
-            // Usamos GetByIdAsync ya que no necesitamos detalles aquí
             var prestamo = await _prestamoRepository.GetByIdAsync(id);
 
             if (prestamo != null)
             {
                 prestamo.FechaDevolucionReal = DateTime.Now;
 
-                // --- USO DE LA ESTRATEGIA DE CÁLCULO POR RETRASO ---
-                // Verificamos si la devolución es tardía
+                // --- USO DE LA FÁBRICA Y ESTRATEGIA POR RETRASO ---
                 if (prestamo.FechaDevolucionReal > prestamo.FechaDevolucionPrevista)
                 {
-                    // 1. Creamos una instancia de la estrategia específica para retraso.
-                    ICalculoMultaStrategy estrategiaRetraso = new CalculoMultaPorRetrasoStrategy();
+                    // 1. Creamos una instancia de la fábrica específica para retraso.
+                    IMultaFactory fabricaMultaRetraso = new MultaPorRetrasoFactory();
 
-                    // 2. Usamos la estrategia para calcular el monto.
-                    //    Le pasamos el objeto 'prestamo' completo.
-                    decimal montoMulta = estrategiaRetraso.CalcularMonto(prestamo);
+                    // 2. Usamos la fábrica para crear el objeto Multa.
+                    //    Le pasamos el socioId, un motivo base (la fábrica lo completará) y el préstamo.
+                    Multa? nuevaMulta = fabricaMultaRetraso.CrearMulta(prestamo.SocioId, "Devolución tardía", prestamo);
 
-                    // Solo creamos la multa si el monto calculado es mayor que cero.
-                    if (montoMulta > 0)
+                    // 3. Verificamos si la fábrica devolvió una multa (podría ser null si no hubo retraso real)
+                    if (nuevaMulta != null)
                     {
-                        // Calculamos los días para el motivo (opcionalmente podrías mover esto a la estrategia)
-                        var diasDeRetraso = (prestamo.FechaDevolucionReal.Value.Date - prestamo.FechaDevolucionPrevista.Date).Days;
-
-                        var nuevaMulta = new Multa
-                        {
-                            SocioId = prestamo.SocioId,
-                            Motivo = $"Devolución tardía de {diasDeRetraso} día(s).",
-                            Monto = montoMulta, // Usamos el monto calculado
-                            FechaCreacion = DateTime.Now,
-                            Estado = EstadoMulta.Pendiente
-                        };
-                        // Usamos el repositorio de multas para añadirla
+                        // 4. Si se creó la multa, la añadimos usando el repositorio.
                         await _multaRepository.AddAsync(nuevaMulta);
                     }
                 }
-                // --- FIN DEL USO DE LA ESTRATEGIA ---
+                // --- FIN DEL USO DE LA FÁBRICA ---
 
-                // Actualizamos el préstamo usando el repositorio
+                // Actualizamos el préstamo
                 await _prestamoRepository.UpdateAsync(prestamo);
 
-                // Actualizamos el estado del libro usando el repositorio
+                // Actualizamos el libro
                 var libro = await _libroRepository.GetByIdAsync(prestamo.LibroId);
                 if (libro != null)
                 {
@@ -182,9 +170,9 @@ namespace libranet.Controllers
                     await _libroRepository.UpdateAsync(libro);
                 }
 
-                // Redirección si está dañado: añadimos 'motivoDanado = true'
                 if (estaDanado)
                 {
+                    // Pasamos indicador para que MultaController sepa que es por daño
                     return RedirectToAction("Crear", "Multa", new { socioId = prestamo.SocioId, motivoDanado = true });
                 }
             }
