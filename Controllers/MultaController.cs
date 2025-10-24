@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore; // Para DbUpdateConcurrencyException y Sele
 using Microsoft.AspNetCore.Mvc.Rendering; // Necesario para SelectListItem
 using System.Linq;
 using System.Threading.Tasks;
+using libranet.BusinessLogic.Strategies;
 
 namespace libranet.Controllers
 {
@@ -32,9 +33,9 @@ namespace libranet.Controllers
         }
 
         // --- CREAR (Mostrar Formulario GET) ---
-        public async Task<IActionResult> Crear(int? socioId)
+        public async Task<IActionResult> Crear(int? socioId, bool? motivoDanado)
         {
-            // CAMBIO 3: Usamos el repositorio de socios para obtener la lista
+            // Usamos el repositorio de socios para obtener la lista
             var sociosList = await _socioRepository.GetAllAsync();
 
             // Convertimos la lista para el ViewModel
@@ -44,16 +45,34 @@ namespace libranet.Controllers
                 Text = $"{s.NumeroSocio} - {s.Apellido}, {s.Nombre}"
             }).ToList();
 
+            // Creamos el ViewModel
             var viewModel = new MultaViewModel
             {
                 Socios = sociosSelectList
+                // Multa ya está inicializada por defecto: = new();
             };
 
+            // Si recibimos un socioId, lo preseleccionamos
             if (socioId.HasValue)
             {
                 viewModel.Multa.SocioId = socioId.Value;
             }
 
+            // --- LÓGICA PARA PRE-RELLENAR POR DAÑO ---
+            // Si el parámetro motivoDanado es true...
+            if (motivoDanado == true)
+            {
+                // 1. Pre-rellenamos el motivo.
+                viewModel.Multa.Motivo = "Libro devuelto con daños.";
+
+                // 2. Usamos la estrategia de daño para calcular y pre-rellenar el monto fijo.
+                ICalculoMultaStrategy estrategiaDano = new CalculoMultaPorDanoStrategy();
+                // Creamos un Prestamo temporal vacío porque CalcularMonto lo requiere, aunque no lo use aquí.
+                viewModel.Multa.Monto = estrategiaDano.CalcularMonto(new Prestamo());
+            }
+            // --- FIN DE LA LÓGICA ---
+
+            // Enviamos el ViewModel (potencialmente pre-rellenado) a la vista.
             return View(viewModel);
         }
 

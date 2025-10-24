@@ -6,6 +6,7 @@ using Microsoft.EntityFrameworkCore; // Para DbUpdateConcurrencyException y Sele
 using Microsoft.AspNetCore.Mvc.Rendering; // Necesario para SelectListItem
 using System.Linq;
 using System.Threading.Tasks;
+using libranet.BusinessLogic.Strategies;
 
 namespace libranet.Controllers
 {
@@ -132,36 +133,48 @@ namespace libranet.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> DevolucionConfirmada(int id, bool estaDanado)
         {
-             // CAMBIO 8: Usamos GetByIdAsync (sin detalles es suficiente aquí)
+            // Usamos GetByIdAsync ya que no necesitamos detalles aquí
             var prestamo = await _prestamoRepository.GetByIdAsync(id);
 
             if (prestamo != null)
             {
                 prestamo.FechaDevolucionReal = DateTime.Now;
 
-                // Lógica de multa automática
+                // --- USO DE LA ESTRATEGIA DE CÁLCULO POR RETRASO ---
+                // Verificamos si la devolución es tardía
                 if (prestamo.FechaDevolucionReal > prestamo.FechaDevolucionPrevista)
                 {
-                    var diasDeRetraso = (prestamo.FechaDevolucionReal.Value.Date - prestamo.FechaDevolucionPrevista.Date).Days;
-                     if (diasDeRetraso > 0) // Solo si hay al menos 1 día de retraso
+                    // 1. Creamos una instancia de la estrategia específica para retraso.
+                    ICalculoMultaStrategy estrategiaRetraso = new CalculoMultaPorRetrasoStrategy();
+
+                    // 2. Usamos la estrategia para calcular el monto.
+                    //    Le pasamos el objeto 'prestamo' completo.
+                    decimal montoMulta = estrategiaRetraso.CalcularMonto(prestamo);
+
+                    // Solo creamos la multa si el monto calculado es mayor que cero.
+                    if (montoMulta > 0)
                     {
+                        // Calculamos los días para el motivo (opcionalmente podrías mover esto a la estrategia)
+                        var diasDeRetraso = (prestamo.FechaDevolucionReal.Value.Date - prestamo.FechaDevolucionPrevista.Date).Days;
+
                         var nuevaMulta = new Multa
                         {
                             SocioId = prestamo.SocioId,
                             Motivo = $"Devolución tardía de {diasDeRetraso} día(s).",
-                            Monto = diasDeRetraso * 100, // Tarifa ejemplo
+                            Monto = montoMulta, // Usamos el monto calculado
                             FechaCreacion = DateTime.Now,
                             Estado = EstadoMulta.Pendiente
                         };
-                         // CAMBIO 9: Usamos el repositorio de multas para añadir
+                        // Usamos el repositorio de multas para añadirla
                         await _multaRepository.AddAsync(nuevaMulta);
                     }
                 }
+                // --- FIN DEL USO DE LA ESTRATEGIA ---
 
-                // CAMBIO 10: Usamos el repositorio de préstamos para actualizar
+                // Actualizamos el préstamo usando el repositorio
                 await _prestamoRepository.UpdateAsync(prestamo);
 
-                // CAMBIO 11: Usamos el repositorio de libros para buscar y actualizar estado
+                // Actualizamos el estado del libro usando el repositorio
                 var libro = await _libroRepository.GetByIdAsync(prestamo.LibroId);
                 if (libro != null)
                 {
@@ -169,10 +182,10 @@ namespace libranet.Controllers
                     await _libroRepository.UpdateAsync(libro);
                 }
 
-                // Redirección si está dañado (la lógica se mantiene)
+                // Redirección si está dañado: añadimos 'motivoDanado = true'
                 if (estaDanado)
                 {
-                    return RedirectToAction("Crear", "Multa", new { socioId = prestamo.SocioId });
+                    return RedirectToAction("Crear", "Multa", new { socioId = prestamo.SocioId, motivoDanado = true });
                 }
             }
 
