@@ -139,5 +139,32 @@ namespace libranet.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        // --- MÉTODO PARA MOSTRAR LOS DETALLES DE UNA MULTA (GET) ---
+        public async Task<IActionResult> Detalles(int? id)
+        {
+            // Si no nos pasan un id, no podemos mostrar nada.
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            // Usamos el repositorio para buscar la multa por ID.
+            // Como GetAllWithDetailsAsync ya carga el Socio, podemos reutilizarlo aquí filtrando por ID,
+            // o podríamos crear un método GetByIdWithDetailsAsync en el repositorio si preferimos.
+            // Vamos a usar el método existente filtrando:
+            var multa = (await _multaRepository.GetAllWithDetailsAsync())
+                            .FirstOrDefault(m => m.MultaId == id);
+
+            // Si no encontramos una multa con ese id, devolvemos un error.
+            if (multa == null)
+            {
+                return NotFound();
+            }
+
+            // Enviamos el objeto 'multa' (con la info del socio) a la vista.
+            return View(multa);
+        }
+
     }
 }

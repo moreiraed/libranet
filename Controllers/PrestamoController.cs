@@ -179,5 +179,28 @@ namespace libranet.Controllers
 
             return RedirectToAction(nameof(Index));
         }
+
+        // --- MÉTODO PARA MOSTRAR LOS DETALLES DE UN PRÉSTAMO (GET) ---
+        public async Task<IActionResult> Detalles(int? id)
+        {
+            // Si no nos pasan un id, no podemos mostrar nada.
+            if (id == null)
+            {
+                return NotFound();
+            }
+
+            // Usamos el repositorio para buscar el préstamo por ID, incluyendo los detalles del Socio y del Libro.
+            var prestamo = await _prestamoRepository.GetByIdWithDetailsAsync(id.Value);
+
+            // Si no encontramos un préstamo con ese id, devolvemos un error.
+            if (prestamo == null)
+            {
+                return NotFound();
+            }
+
+            // Enviamos el objeto 'prestamo' (con toda su información) a la vista.
+            return View(prestamo);
+        }
+
     }
 }

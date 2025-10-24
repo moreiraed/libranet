@@ -44,6 +44,8 @@
                     }
                 </td>
                 <td>
+                    <a asp-action="Detalles" asp-route-id="@prestamo.PrestamoId" class="btn btn-sm btn-secondary">Detalles</a>
+                    
                     @* Si el préstamo está activo, mostramos un botón para registrar la devolución. *@
                     @if (prestamo.FechaDevolucionReal == null)
                     {

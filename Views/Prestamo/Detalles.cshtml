@@ -1,0 +1,66 @@
+@model libranet.Models.Prestamo
+@{
+    ViewData["Title"] = "Detalles del Préstamo";
+}
+
+<h2>@ViewData["Title"]</h2>
+<hr />
+
+<div>
+    <h4>Información del Préstamo</h4>
+    <dl class="row">
+        <dt class="col-sm-3">Libro</dt>
+        @* Usamos el operador 'null conditional' (?.) por si Libro es null *@
+        <dd class="col-sm-9">@Model.Libro?.Titulo (@Model.Libro?.Autor)</dd>
+
+        <dt class="col-sm-3">Socio</dt>
+        <dd class="col-sm-9">@Model.Socio?.Apellido, @Model.Socio?.Nombre (Nro: @Model.Socio?.NumeroSocio)</dd>
+
+        <dt class="col-sm-3">Fecha de Préstamo</dt>
+        <dd class="col-sm-9">@Model.FechaPrestamo.ToString("dd/MM/yyyy HH:mm")</dd>
+
+        <dt class="col-sm-3">Devolución Prevista</dt>
+        <dd class="col-sm-9">@Model.FechaDevolucionPrevista.ToString("dd/MM/yyyy")</dd>
+
+        <dt class="col-sm-3">Fecha Devolución Real</dt>
+        <dd class="col-sm-9">
+            @if (Model.FechaDevolucionReal.HasValue)
+            {
+                @Model.FechaDevolucionReal.Value.ToString("dd/MM/yyyy HH:mm")
+            }
+            else
+            {
+                <span class="text-muted">Préstamo Activo</span>
+            }
+        </dd>
+
+         <dt class="col-sm-3">Estado</dt>
+        <dd class="col-sm-9">
+             @if (Model.FechaDevolucionReal == null)
+            {
+                // Si la fecha de devolución es nula, el préstamo está activo.
+                // Verificamos si está vencido
+                if(Model.FechaDevolucionPrevista < DateTime.Now){
+                     <span class="badge bg-danger">Vencido</span>
+                } else {
+                     <span class="badge bg-warning text-dark">Activo</span>
+                }
+            }
+            else
+            {
+                // Si tiene fecha, el préstamo está finalizado.
+                <span class="badge bg-success">Devuelto</span>
+            }
+        </dd>
+
+    </dl>
+</div>
+
+<div class="mt-3">
+    @* Mostramos el botón de devolución solo si el préstamo está activo *@
+    @if (Model.FechaDevolucionReal == null)
+    {
+         <a asp-action="Devolucion" asp-route-id="@Model.PrestamoId" class="btn btn-info">Registrar Devolución</a>
+    }
+    <a asp-action="Index" class="btn btn-secondary">Volver a la Lista</a>
+</div>

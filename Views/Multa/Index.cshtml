@@ -39,6 +39,8 @@
                     }
                 </td>
                 <td>
+                    <a asp-action="Detalles" asp-route-id="@multa.MultaId" class="btn btn-sm btn-secondary">Detalles</a>
+
                     @if (multa.Estado == libranet.Models.EstadoMulta.Pendiente)
                     {
                         @* Botón para marcar la multa como pagada (lo programaremos luego) *@
