@@ -55,6 +55,10 @@ namespace libranet.Controllers
 
                 // Usamos el repositorio para añadir el nuevo socio.
                 await _socioRepository.AddAsync(socio);
+
+                // Mensaje de éxito usando TempData
+                TempData["SuccessMessage"] = $"Socio '{socio.Apellido}, {socio.Nombre}' creado exitosamente.";
+
                 return RedirectToAction(nameof(Index));
             }
             return View(socio);
@@ -105,6 +109,9 @@ namespace libranet.Controllers
 
                     // Le decimos al repositorio que actualice el objeto ORIGINAL (modificado).
                     await _socioRepository.UpdateAsync(socioOriginal);
+
+                    // Mensaje de éxito usando TempData
+                    TempData["SuccessMessage"] = $"Socio '{socioOriginal.Apellido}, {socioOriginal.Nombre}' actualizado exitosamente.";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
@@ -132,8 +139,29 @@ namespace libranet.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EliminarConfirmado(int id)
         {
-            // Usamos el repositorio para eliminar el socio.
-            await _socioRepository.DeleteAsync(id);
+            // --- OBTENER SOCIO ANTES DE BORRAR (PARA EL MENSAJE) ---
+            // Buscamos el socio para poder mostrar su nombre en el mensaje de éxito.
+            var socioParaEliminar = await _socioRepository.GetByIdAsync(id); 
+            string nombreSocio = "desconocido"; // Valor por defecto si no se encuentra
+
+            if (socioParaEliminar != null)
+            {
+                // Guardamos el nombre antes de borrarlo
+                nombreSocio = $"{socioParaEliminar.Apellido}, {socioParaEliminar.Nombre}"; 
+                
+                // Usamos el repositorio para eliminar el socio.
+                await _socioRepository.DeleteAsync(id);
+
+                // --- AÑADIMOS EL MENSAJE DE ÉXITO ---
+                TempData["SuccessMessage"] = $"Socio '{nombreSocio}' eliminado exitosamente.";
+            }
+            else
+            {
+                // Si no se encontró el socio (quizás ya fue borrado), mostramos un mensaje de error.
+                TempData["ErrorMessage"] = "Error: No se encontró el socio para eliminar.";
+            }
+
+            // Redirigimos a la lista independientemente del resultado.
             return RedirectToAction(nameof(Index));
         }
 
