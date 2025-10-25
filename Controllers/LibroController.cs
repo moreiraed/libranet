@@ -1,68 +1,59 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using libranet.Models;
-using libranet.Repositories; // Añadimos using para los repositorios
-using Microsoft.EntityFrameworkCore; // Aún necesario para DbUpdateConcurrencyException
-using System.Threading.Tasks;
-using System.Linq;
-using System.Collections.Generic;
+using libranet.Repositories;
+using Microsoft.EntityFrameworkCore;
 
 namespace libranet.Controllers
 {
     [Authorize]
     public class LibroController : Controller
     {
-        // --- CAMBIO 1: Inyectamos la interfaz del repositorio, no el DbContext ---
         private readonly ILibroRepository _libroRepository;
 
-        // El constructor ahora recibe ILibroRepository
         public LibroController(ILibroRepository libroRepository)
         {
             _libroRepository = libroRepository;
         }
 
-        // --- INDEX (Leer Todos) ---
+        // --- INDEX ---
         public async Task<IActionResult> Index()
         {
-            // CAMBIO 2: Llamamos al método del repositorio
             var libros = await _libroRepository.GetAllAsync();
             return View(libros);
         }
 
-        // --- CREAR (Mostrar Formulario GET) ---
+        // --- CREAR (GET) ---
         public IActionResult Crear()
         {
             var libro = new Libro { Estado = EstadoLibro.Disponible };
             return View(libro);
         }
 
-        // --- CREAR (Guardar POST) ---
+        // --- CREAR (POST) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Crear(Libro libro)
         {
             if (ModelState.IsValid)
             {
-                // CAMBIO 3: Usamos el repositorio para añadir el nuevo libro
                 await _libroRepository.AddAsync(libro);
+                TempData["SuccessMessage"] = $"Libro '{libro.Titulo}' creado exitosamente.";
                 return RedirectToAction(nameof(Index));
             }
             return View(libro);
         }
 
-        // --- EDITAR (Mostrar Formulario GET) ---
+        // --- EDITAR (GET) ---
         public async Task<IActionResult> Editar(int? id)
         {
             if (id == null) return NotFound();
-
-            // CAMBIO 4: Usamos el repositorio para obtener el libro por ID
             var libro = await _libroRepository.GetByIdAsync(id.Value);
             if (libro == null) return NotFound();
-
             return View(libro);
         }
 
-        // --- EDITAR (Guardar POST) ---
+        // --- EDITAR (POST) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Editar(int id, Libro libro)
@@ -73,20 +64,21 @@ namespace libranet.Controllers
             {
                 try
                 {
-                    // CAMBIO 5: Usamos el repositorio para actualizar el libro
                     await _libroRepository.UpdateAsync(libro);
+                    TempData["SuccessMessage"] = $"Libro '{libro.Titulo}' actualizado exitosamente.";
                 }
                 catch (DbUpdateConcurrencyException)
                 {
-                    // Verificar si el libro todavía existe antes de NotFound
                     var exists = await _libroRepository.GetByIdAsync(id) != null;
                     if (!exists)
                     {
-                        return NotFound();
+                        TempData["ErrorMessage"] = "Error: El libro que intentaba editar ya no existe.";
+                        return RedirectToAction(nameof(Index)); // Redirigir si no existe
                     }
                     else
                     {
-                        throw; // Relanzar la excepción si es otro problema de concurrencia
+                        TempData["ErrorMessage"] = "Error de concurrencia al actualizar el libro.";
+                        return View(libro); // Devolver vista con datos actuales y error
                     }
                 }
                 return RedirectToAction(nameof(Index));
@@ -94,56 +86,50 @@ namespace libranet.Controllers
             return View(libro);
         }
 
-        // --- ELIMINAR (Mostrar Confirmación GET) ---
+        // --- ELIMINAR (GET) ---
         public async Task<IActionResult> Eliminar(int? id)
         {
             if (id == null) return NotFound();
-
-            // CAMBIO 6: Usamos el repositorio para obtener el libro por ID
             var libro = await _libroRepository.GetByIdAsync(id.Value);
             if (libro == null) return NotFound();
-
             return View(libro);
         }
 
-        // --- ELIMINAR (Confirmar POST) ---
+        // --- ELIMINAR (POST) ---
         [HttpPost, ActionName("Eliminar")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EliminarConfirmado(int id)
         {
-            // CAMBIO 7: Usamos el repositorio para eliminar el libro
-            await _libroRepository.DeleteAsync(id);
+            var libroParaEliminar = await _libroRepository.GetByIdAsync(id); // Obtener antes de borrar
+
+            if (libroParaEliminar != null)
+            {
+                await _libroRepository.DeleteAsync(id);
+                TempData["SuccessMessage"] = $"Libro '{libroParaEliminar.Titulo}' eliminado exitosamente.";
+            }
+            else
+            {
+                TempData["ErrorMessage"] = "Error: No se encontró el libro para eliminar.";
+            }
             return RedirectToAction(nameof(Index));
         }
 
-        // --- BUSCAR (API Autocompletado GET) ---
+        // --- BUSCAR (GET API) ---
         [HttpGet]
         public async Task<IActionResult> Buscar(string term)
         {
             if (string.IsNullOrEmpty(term)) return Json(new List<object>());
-
-            // CAMBIO 8: Usamos el repositorio para buscar libros disponibles
             var libros = await _libroRepository.SearchAvailableAsync(term);
-
-            // La transformación a formato {id, label} se mantiene en el controlador
-            var result = libros.Select(l => new {
-                id = l.LibroId,
-                label = $"{l.Titulo} ({l.Autor})"
-            }).ToList();
-
+            var result = libros.Select(l => new { id = l.LibroId, label = $"{l.Titulo} ({l.Autor})" }).ToList();
             return Json(result);
         }
 
-        // --- DETALLES (Mostrar GET) ---
+        // --- DETALLES (GET) ---
         public async Task<IActionResult> Detalles(int? id)
         {
             if (id == null) return NotFound();
-
-            // CAMBIO 9: Usamos el método específico del repositorio que incluye detalles
             var libro = await _libroRepository.GetByIdWithDetailsAsync(id.Value);
-
             if (libro == null) return NotFound();
-
             return View(libro);
         }
     }

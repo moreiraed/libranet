@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using libranet.Models;
-using libranet.Repositories; // ¡Importante! Añadimos el using para los repositorios
-using Microsoft.EntityFrameworkCore; // Para DbUpdateConcurrencyException y SelectListItem (temporalmente)
-using Microsoft.AspNetCore.Mvc.Rendering; // Necesario para SelectListItem
-using System.Linq;
-using System.Threading.Tasks;
+using libranet.Repositories;
+using Microsoft.AspNetCore.Mvc.Rendering;
+
 using libranet.BusinessLogic.Strategies;
 using libranet.BusinessLogic.Factories;
 
@@ -14,86 +12,83 @@ namespace libranet.Controllers
     [Authorize]
     public class MultaController : Controller
     {
-        // --- CAMBIO 1: Inyectamos los repositorios necesarios ---
         private readonly IMultaRepository _multaRepository;
-        private readonly ISocioRepository _socioRepository; // Necesario para Crear (GET)
+        private readonly ISocioRepository _socioRepository;
+        private readonly IEnumerable<ICalculoMultaStrategy> _calculoMultaStrategies;
 
-        // El constructor ahora recibe los repositorios
-        public MultaController(IMultaRepository multaRepository, ISocioRepository socioRepository)
+        public MultaController(
+            IMultaRepository multaRepository,
+            ISocioRepository socioRepository,
+            IEnumerable<ICalculoMultaStrategy> calculoMultaStrategies)
         {
             _multaRepository = multaRepository;
             _socioRepository = socioRepository;
+            _calculoMultaStrategies = calculoMultaStrategies;
         }
 
-        // --- INDEX (Leer Todas) ---
+        // --- INDEX ---
         public async Task<IActionResult> Index()
         {
-            // CAMBIO 2: Usamos el repositorio de multas con detalles
             var multas = await _multaRepository.GetAllWithDetailsAsync();
             return View(multas);
         }
 
-        // --- CREAR (Mostrar Formulario GET) ---
+        // --- CREAR (GET) ---
         public async Task<IActionResult> Crear(int? socioId, bool? motivoDanado)
         {
-            // Usamos el repositorio de socios para obtener la lista
             var sociosList = await _socioRepository.GetAllAsync();
-
-            // Convertimos la lista para el ViewModel
             var sociosSelectList = sociosList.Select(s => new SelectListItem
             {
                 Value = s.SocioId.ToString(),
                 Text = $"{s.NumeroSocio} - {s.Apellido}, {s.Nombre}"
             }).ToList();
 
-            // Creamos el ViewModel
-            var viewModel = new MultaViewModel
-            {
-                Socios = sociosSelectList
-                // Multa ya está inicializada por defecto: = new();
-            };
+            var viewModel = new MultaViewModel { Socios = sociosSelectList };
 
-            // Si recibimos un socioId, lo preseleccionamos
-            if (socioId.HasValue)
+            if (socioId.HasValue) viewModel.Multa.SocioId = socioId.Value;
+
+            if (motivoDanado == true && socioId.HasValue)
             {
-                viewModel.Multa.SocioId = socioId.Value;
+                var estrategiaDano = _calculoMultaStrategies.OfType<CalculoMultaPorDanoStrategy>().FirstOrDefault();
+                if (estrategiaDano != null)
+                {
+                    IMultaFactory fabricaMultaDano = new MultaPorDanoFactory();
+                    // Usamos la fábrica para obtener los valores predeterminados
+                    Multa? multaPorDanoTemp = fabricaMultaDano.CrearMulta(socioId.Value, "Libro devuelto con daños."); // Guardamos como Multa?
+
+                    if (multaPorDanoTemp != null)
+                    {
+                        viewModel.Multa.Motivo = multaPorDanoTemp.Motivo;
+                        viewModel.Multa.Monto = multaPorDanoTemp.Monto;
+                    }
+                }
             }
-
-            // --- LÓGICA PARA PRE-RELLENAR POR DAÑO ---
-            // Si el parámetro motivoDanado es true...
-            if (motivoDanado == true)
-            {
-                // 1. Pre-rellenamos el motivo.
-                viewModel.Multa.Motivo = "Libro devuelto con daños.";
-
-                // 2. Usamos la estrategia de daño para calcular y pre-rellenar el monto fijo.
-                ICalculoMultaStrategy estrategiaDano = new CalculoMultaPorDanoStrategy();
-                // Creamos un Prestamo temporal vacío porque CalcularMonto lo requiere, aunque no lo use aquí.
-                viewModel.Multa.Monto = estrategiaDano.CalcularMonto(new Prestamo());
-            }
-            // --- FIN DE LA LÓGICA ---
-
-            // Enviamos el ViewModel (potencialmente pre-rellenado) a la vista.
             return View(viewModel);
         }
 
-        // --- CREAR (Guardar POST) ---
+        // --- CREAR (POST) ---
         [HttpPost]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> Crear(MultaViewModel viewModel)
         {
-            // Nota: ModelState.IsValid verifica el objeto viewModel.Multa
+            // Verificamos explícitamente SocioId y Monto
+            if (viewModel.Multa.SocioId <= 0) ModelState.AddModelError("Multa.SocioId", "Debe seleccionar un socio.");
+            if (viewModel.Multa.Monto < 0) ModelState.AddModelError("Multa.Monto", "El monto no puede ser negativo.");
+            if (string.IsNullOrWhiteSpace(viewModel.Multa.Motivo)) ModelState.AddModelError("Multa.Motivo", "El motivo es requerido.");
+
+
             if (ModelState.IsValid)
             {
                 viewModel.Multa.FechaCreacion = DateTime.Now;
                 viewModel.Multa.Estado = EstadoMulta.Pendiente;
-
-                // CAMBIO 4: Usamos el repositorio de multas para añadir
                 await _multaRepository.AddAsync(viewModel.Multa);
+
+                TempData["SuccessMessage"] = $"Multa registrada exitosamente.";
+
                 return RedirectToAction(nameof(Index));
             }
 
-            // Si no es válido, necesitamos recargar la lista de socios para el dropdown
+            // Recargamos socios si hay error
             var sociosList = await _socioRepository.GetAllAsync();
             viewModel.Socios = sociosList.Select(s => new SelectListItem
             {
@@ -101,70 +96,46 @@ namespace libranet.Controllers
                 Text = $"{s.NumeroSocio} - {s.Apellido}, {s.Nombre}"
             }).ToList();
 
-            return View(viewModel); // Devuelve la vista con el modelo y los errores
+            return View(viewModel);
         }
 
-        // --- PAGAR (Mostrar Confirmación GET) ---
+        // --- PAGAR (GET) ---
         public async Task<IActionResult> Pagar(int? id)
         {
             if (id == null) return NotFound();
-
-            // CAMBIO 5: Usamos el repositorio de multas. Necesitamos cargar el Socio manualmente
-            // o crear un GetByIdWithDetailsAsync en IMultaRepository. Por simplicidad, lo cargaremos aquí.
             var multa = await _multaRepository.GetByIdAsync(id.Value);
             if (multa == null) return NotFound();
-
-            // Cargamos el socio asociado manualmente (alternativa a Include)
             multa.Socio = await _socioRepository.GetByIdAsync(multa.SocioId);
-
             if (multa.Socio == null) return NotFound(); // Seguridad extra
-
             return View(multa);
         }
 
-        // --- PAGAR (Confirmar POST) ---
+        // --- PAGAR (POST) ---
         [HttpPost, ActionName("Pagar")]
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> PagarConfirmado(int id)
         {
-            // CAMBIO 6: Usamos el repositorio para obtener la multa
             var multa = await _multaRepository.GetByIdAsync(id);
-
             if (multa != null)
             {
                 multa.Estado = EstadoMulta.Pagada;
-                // CAMBIO 7: Usamos el repositorio para actualizar
                 await _multaRepository.UpdateAsync(multa);
+                TempData["SuccessMessage"] = "Pago de multa registrado exitosamente.";
             }
-
+            else
+            {
+                TempData["ErrorMessage"] = "Error: No se encontró la multa para registrar el pago.";
+            }
             return RedirectToAction(nameof(Index));
         }
 
-        // --- MÉTODO PARA MOSTRAR LOS DETALLES DE UNA MULTA (GET) ---
+        // --- DETALLES (GET) ---
         public async Task<IActionResult> Detalles(int? id)
         {
-            // Si no nos pasan un id, no podemos mostrar nada.
-            if (id == null)
-            {
-                return NotFound();
-            }
-
-            // Usamos el repositorio para buscar la multa por ID.
-            // Como GetAllWithDetailsAsync ya carga el Socio, podemos reutilizarlo aquí filtrando por ID,
-            // o podríamos crear un método GetByIdWithDetailsAsync en el repositorio si preferimos.
-            // Vamos a usar el método existente filtrando:
-            var multa = (await _multaRepository.GetAllWithDetailsAsync())
-                            .FirstOrDefault(m => m.MultaId == id);
-
-            // Si no encontramos una multa con ese id, devolvemos un error.
-            if (multa == null)
-            {
-                return NotFound();
-            }
-
-            // Enviamos el objeto 'multa' (con la info del socio) a la vista.
+            if (id == null) return NotFound();
+            var multa = (await _multaRepository.GetAllWithDetailsAsync()).FirstOrDefault(m => m.MultaId == id);
+            if (multa == null) return NotFound();
             return View(multa);
         }
-
     }
 }
