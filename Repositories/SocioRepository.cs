@@ -99,5 +99,22 @@ namespace libranet.Repositories
             return await _context.Socios.AnyAsync(s => s.DNI.ToLower() == dni.ToLower() && s.SocioId != socioIdToExclude);
         }
 
+        // Implementación para la búsqueda en la página Index.
+        public async Task<List<Socio>> FindAsync(string searchTerm)
+        {
+            // Convertimos el término a minúsculas una sola vez para eficiencia.
+            var lowerCaseSearchTerm = searchTerm.ToLower();
+
+            // La consulta busca en los cuatro campos relevantes.
+            // No usamos .Take() aquí, queremos todos los resultados.
+            return await _context.Socios
+                .Where(s =>
+                    (s.Apellido != null && s.Apellido.ToLower().Contains(lowerCaseSearchTerm)) ||
+                    (s.Nombre != null && s.Nombre.ToLower().Contains(lowerCaseSearchTerm)) ||
+                    (s.DNI != null && s.DNI.Contains(searchTerm)) || // DNI usualmente es exacto o no sensible a mayúsculas
+                    (s.NumeroSocio != null && s.NumeroSocio.ToLower().Contains(lowerCaseSearchTerm))
+                ).ToListAsync();
+        }
+
     }
 }

@@ -1,11 +1,9 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Authorization;
 using libranet.Models;
-using libranet.Repositories; // ¡Importante! Añadimos el using para nuestros repositorios.
-using Microsoft.EntityFrameworkCore; // Todavía necesario para DbUpdateConcurrencyException
-using System.Threading.Tasks; // Necesario para Task<>
-using System.Linq; // Necesario para Select() en Buscar()
-using System.Collections.Generic; // Necesario para List<> en Buscar()
+using libranet.Repositories;
+using Microsoft.EntityFrameworkCore;
+
 
 namespace libranet.Controllers
 {
@@ -19,11 +17,24 @@ namespace libranet.Controllers
             _socioRepository = socioRepository;
         }
 
-        // --- INDEX (Leer Todos) ---
-        public async Task<IActionResult> Index()
+        // --- INDEX (Leer Todos - CON BÚSQUEDA) ---
+        public async Task<IActionResult> Index(string? searchString) // El parámetro se llama searchString desde la vista
         {
-            var socios = await _socioRepository.GetAllAsync();
-            return View(socios);
+            List<Socio> socios;
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                // Si hay término de búsqueda, llamamos al nuevo método FindAsync del repositorio.
+                socios = await _socioRepository.FindAsync(searchString);
+            }
+            else
+            {
+                // Si no hay búsqueda, obtenemos todos los socios.
+                socios = await _socioRepository.GetAllAsync();
+            }
+
+            ViewData["CurrentFilter"] = searchString; // Mantiene el valor en el campo de búsqueda
+            return View(socios); // Pasa la lista (filtrada o completa) a la vista
         }
 
         // --- CREAR (Mostrar Formulario GET) ---
@@ -40,7 +51,7 @@ namespace libranet.Controllers
             if (ModelState.IsValid)
             {
                 
-                // Llamamos al método del repositorio para ver si el DNI ya existe.
+                // Llamar al método del repositorio para ver si el DNI ya existe.
                 bool dniYaExiste = await _socioRepository.DniExistsAsync(socio.DNI);
 
                 if (dniYaExiste)
@@ -50,7 +61,7 @@ namespace libranet.Controllers
                     return View(socio);
                 }        
 
-                // Usamos el repositorio para obtener el último socio.
+                // Obtener el último socio.
                 var ultimoSocio = await _socioRepository.GetLastAsync();
                 int nuevoNumero = 1;
 
@@ -64,7 +75,7 @@ namespace libranet.Controllers
                 socio.NumeroSocio = nuevoNumero.ToString("D5");
                 socio.FechaDeAlta = DateTime.Now;
 
-                // Usamos el repositorio para añadir el nuevo socio.
+                // Añadir el nuevo socio.
                 await _socioRepository.AddAsync(socio);
 
                 // Mensaje de éxito usando TempData

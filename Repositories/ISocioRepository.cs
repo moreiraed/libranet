@@ -38,8 +38,11 @@ namespace libranet.Repositories
 
         // Verifica si ya existe un socio con el DNI especificado.
         Task<bool> DniExistsAsync(string dni);
-        
+
         // Verifica si el DNI existe para OTRO socio diferente al ID proporcionado.
         Task<bool> DniExistsForAnotherSocioAsync(string dni, int socioIdToExclude);
+
+        // Busca socios por Apellido, Nombre, DNI o NumeroSocio para la lista Index.
+        Task<List<Socio>> FindAsync(string searchTerm);
     }
 }
