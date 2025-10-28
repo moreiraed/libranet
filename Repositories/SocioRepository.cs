@@ -1,9 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using libranet.Data;
 using libranet.Models;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 
 namespace libranet.Repositories
 {
@@ -77,7 +74,7 @@ namespace libranet.Repositories
             return await _context.Socios.OrderByDescending(s => s.SocioId).FirstOrDefaultAsync();
         }
 
-        // Implementación para obtener un socio con sus detalles (préstamos y libros).
+        // Obtener un socio con sus detalles (préstamos y libros).
         public async Task<Socio?> GetByIdWithDetailsAsync(int id)
         {
             // Usamos Include y ThenInclude para cargar los datos relacionados.
@@ -86,5 +83,21 @@ namespace libranet.Repositories
                     .ThenInclude(p => p.Libro) // Por cada préstamo, carga el libro asociado
                 .FirstOrDefaultAsync(m => m.SocioId == id); // Busca el socio por ID
         }
+
+        // Verificar si un DNI ya existe.
+        public async Task<bool> DniExistsAsync(string dni)
+        {
+            // Busca si existe algún socio cuyo DNI (ignorando mayúsculas/minúsculas)
+            // coincida con el DNI proporcionado.
+            // AnyAsync() es eficiente porque devuelve true tan pronto como encuentra una coincidencia.
+            return await _context.Socios.AnyAsync(s => s.DNI.ToLower() == dni.ToLower());
+        }
+
+        public async Task<bool> DniExistsForAnotherSocioAsync(string dni, int socioIdToExclude)
+        {
+            // Busca si existe algún socio con el mismo DNI pero DIFERENTE SocioId.
+            return await _context.Socios.AnyAsync(s => s.DNI.ToLower() == dni.ToLower() && s.SocioId != socioIdToExclude);
+        }
+
     }
 }

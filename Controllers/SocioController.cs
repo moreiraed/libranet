@@ -39,6 +39,17 @@ namespace libranet.Controllers
         {
             if (ModelState.IsValid)
             {
+                
+                // Llamamos al método del repositorio para ver si el DNI ya existe.
+                bool dniYaExiste = await _socioRepository.DniExistsAsync(socio.DNI);
+
+                if (dniYaExiste)
+                {
+                    // Si el DNI ya existe, añadimos un error específico al ModelState.
+                    ModelState.AddModelError("DNI", "Ya existe un socio registrado con este DNI.");
+                    return View(socio);
+                }        
+
                 // Usamos el repositorio para obtener el último socio.
                 var ultimoSocio = await _socioRepository.GetLastAsync();
                 int nuevoNumero = 1;
@@ -88,6 +99,16 @@ namespace libranet.Controllers
 
             if (ModelState.IsValid)
             {
+                // Verificar DNI Único
+                bool dniDuplicado = await _socioRepository.DniExistsForAnotherSocioAsync(socioFormulario.DNI, id);
+                if (dniDuplicado)
+                {
+                    ModelState.AddModelError("DNI", "Ya existe otro socio registrado con este DNI.");
+                    // Si hay error, volvemos directamente a la vista
+                    return View(socioFormulario);
+                }
+
+                // Si el DNI es válido (no duplicado), procedemos a actualizar...
                 try
                 {
                     // Buscamos el socio ORIGINAL en la base de datos usando el ID.
@@ -139,29 +160,28 @@ namespace libranet.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> EliminarConfirmado(int id)
         {
-            // --- OBTENER SOCIO ANTES DE BORRAR (PARA EL MENSAJE) ---
-            // Buscamos el socio para poder mostrar su nombre en el mensaje de éxito.
+            // Buscar socio para mostrar su nombre en el mensaje de éxito.
             var socioParaEliminar = await _socioRepository.GetByIdAsync(id); 
             string nombreSocio = "desconocido"; // Valor por defecto si no se encuentra
 
             if (socioParaEliminar != null)
             {
-                // Guardamos el nombre antes de borrarlo
+                // Guardar nombre antes de borrarlo
                 nombreSocio = $"{socioParaEliminar.Apellido}, {socioParaEliminar.Nombre}"; 
                 
-                // Usamos el repositorio para eliminar el socio.
+                // Usar el repositorio para eliminar el socio.
                 await _socioRepository.DeleteAsync(id);
 
-                // --- AÑADIMOS EL MENSAJE DE ÉXITO ---
+                // Mostrar mensaje de exito
                 TempData["SuccessMessage"] = $"Socio '{nombreSocio}' eliminado exitosamente.";
             }
             else
             {
-                // Si no se encontró el socio (quizás ya fue borrado), mostramos un mensaje de error.
+                // Mostrar mensaje de error si no se encontró el socio (quizás ya fue borrado).
                 TempData["ErrorMessage"] = "Error: No se encontró el socio para eliminar.";
             }
 
-            // Redirigimos a la lista independientemente del resultado.
+            // Redirigir a la lista independientemente del resultado.
             return RedirectToAction(nameof(Index));
         }
 

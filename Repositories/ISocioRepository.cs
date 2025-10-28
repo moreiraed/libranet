@@ -35,5 +35,11 @@ namespace libranet.Repositories
 
         // Obtiene un socio por ID, incluyendo sus préstamos y los libros de esos préstamos.
         Task<Socio?> GetByIdWithDetailsAsync(int id);
+
+        // Verifica si ya existe un socio con el DNI especificado.
+        Task<bool> DniExistsAsync(string dni);
+        
+        // Verifica si el DNI existe para OTRO socio diferente al ID proporcionado.
+        Task<bool> DniExistsForAnotherSocioAsync(string dni, int socioIdToExclude);
     }
 }
