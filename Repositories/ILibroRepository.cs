@@ -26,5 +26,8 @@ namespace libranet.Repositories
 
         // Obtiene un libro por ID, incluyendo sus préstamos y socios.
         Task<Libro?> GetByIdWithDetailsAsync(int id);
+
+        // Busca libros por Título, Autor o ISBN para la lista Index.
+        Task<List<Libro>> FindAsync(string searchTerm);
     }
 }

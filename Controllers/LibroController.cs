@@ -16,10 +16,26 @@ namespace libranet.Controllers
             _libroRepository = libroRepository;
         }
 
-        // --- INDEX ---
-        public async Task<IActionResult> Index()
+        // --- INDEX (Leer Todos - CON BÚSQUEDA) ---
+        public async Task<IActionResult> Index(string? searchString)
         {
-            var libros = await _libroRepository.GetAllAsync();
+            List<Libro> libros; // Variable para la lista final
+
+            if (!String.IsNullOrEmpty(searchString))
+            {
+                // Si hay término de búsqueda, llamamos al nuevo método FindAsync del repositorio.
+                libros = await _libroRepository.FindAsync(searchString);
+            }
+            else
+            {
+                // Si no hay búsqueda, obtenemos todos los libros.
+                libros = await _libroRepository.GetAllAsync();
+            }
+
+            // Guardamos el término buscado para mostrarlo en la vista.
+            ViewData["CurrentFilter"] = searchString;
+
+            // Pasamos la lista (filtrada o completa) a la vista.
             return View(libros);
         }
 
